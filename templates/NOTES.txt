@@ -1,0 +1,5 @@
+Selamat, kita sudah berhasil menginstall menggunakan Helm Chart
+
+untuk mengkases network silahkan gunakan URI berikut ini:
+
+{{ .Release.Name}}.{{ .Release.Namespace }}:{{ .Values.service.port }}

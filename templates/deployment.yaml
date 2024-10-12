@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "my-app-chart.label" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ quote .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ quote .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ print .Values.image.repository ":" .Values.image.tag | lower | quote }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.env }}
+        env:
+          {{- range $key, $value := . }}
+            - name: {{ $key }}
+              value: {{ $value }}
+          {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+
+      initContainers:
+      - name: init-preparation
+        image: busybox:1.36
+        command: ['/script/init-command.sh']
+        volumeMounts:
+          - name: init-command
+            mountPath: /script
+          - name: config-file
+            mountPath: /config
+      
+      volumes:
+        - name: init-command
+          configMap:
+            name: {{ .Release.Name }}-configmap
+            defaultMode: 500
+        - name: config-file
+          emptyDir: {}

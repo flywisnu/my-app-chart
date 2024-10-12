@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  init-command.sh:
+    {{- .Files.Get "file/init-command.sh" | nindent 4 }}
+  key: value
